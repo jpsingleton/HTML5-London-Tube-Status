@@ -1,0 +1,84 @@
+﻿<!DOCTYPE html>
+<!--
+
+Pragmatic London Tube Status - HTML5
+
+Copyright James Singleton 2011 (unop.co.uk)
+Licensed under a Creative Commons Attribution 3.0 Unported License.
+
+-->
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="initial-scale=1.0, width=device-width, height=device-height, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Pragmatic London Tube Status</title>
+    <link rel="stylesheet" type="text/css" href="http://code.jquery.com/mobile/1.0b2/jquery.mobile-1.0b2.min.css" />
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript">
+        $(document).bind("mobileinit", function () {
+            $.mobile.autoInitializePage = false;
+        });
+    </script>
+    <script type="text/javascript" src="http://code.jquery.com/mobile/1.0b2/jquery.mobile-1.0b2.min.js"></script>
+</head>
+<body>
+    <div data-role="page" id="main">
+        <div data-role="header">
+            <a href="http://unop.co.uk/" data-icon="home" data-theme="b">UnOp</a>
+            <h1>
+                Tube Status
+            </h1>
+            <a href="http://tubeupdates.com/" data-icon="info" data-theme="b" data-iconpos="right">API</a>
+        </div>
+        <div data-role="content" id="list">
+            <ul data-role="listview" data-count-theme="b" id="tubelines">
+            </ul>
+        </div>
+        <div data-role="footer">
+            <h1>
+                <script type="text/javascript">
+                    var currentTime = new Date();
+                    var month = currentTime.getMonth() + 1;
+                    var day = currentTime.getDate();
+                    var year = currentTime.getFullYear();
+                    var hours = currentTime.getHours();
+                    var minutes = currentTime.getMinutes();
+                    if (minutes < 10) {
+                        minutes = "0" + minutes;
+                    }
+                    document.write(year + "-" + month + "-" + day + " " + hours + ":" + minutes);
+                </script>
+            </h1>
+        </div>
+    </div>
+    <script type="text/javascript">
+        jQuery.getJSON("http://api.tubeupdates.com/?method=get.status&return=name,status,id&callback=?",
+        function (data) {
+            $.each(data.response.lines, function (i, line) {
+                var url = '#';
+                var icon = 'check';
+                var status = 'bog standard service';
+                var theme = 'c';
+                if (line.status != 'good service') {
+                    icon = 'alert';
+                    status = line.status;
+                    theme = 'e';
+                    var id = line.id;
+                    if (line.id == 'waterloocity') {
+                        id = 'waterlooandcity';
+                    }
+                    else if (line.id == 'docklands') {
+                        id = 'dlr';
+                    }
+                    else if (line.id == 'hammersmithcity') {
+                        id = 'hammersmithandcity';
+                    }
+                    url = 'http://m.tfl.gov.uk/mt/www.tfl.gov.uk/tfl/livetravelnews/realtime/tube/default.html?un_jtt_v_message=' + id;
+                }
+                $('<li data-icon="' + icon + '" data-theme="' + theme + '"><a href="' + url + '">' + line.name + ' <span class="ui-li-count">' + status + '</span></li>').appendTo("#tubelines");
+            });
+            $.mobile.initializePage();
+        });
+    </script>
+</body>
+</html>
